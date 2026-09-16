@@ -314,4 +314,4 @@ The Context API also helped keep the favorites state synchronized throughout the
 
 ## Author
 
-Created as part of a React Software Engineering assignment.
+Truong Pham
