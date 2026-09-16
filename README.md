@@ -1,43 +1,8 @@
 # RecipeFinder
 
-## Project Structure
+RecipeFinder is a client-side recipe discovery application built with React, TypeScript, Vite, Tailwind CSS v4, and the TheMealDB API.
 
-\`\`\`text
-recipe-discovery/
-├── public/
-├── src/
-│   ├── components/
-│   │   ├── CategoryCard.tsx
-│   │   ├── EmptyState.tsx
-│   │   ├── ErrorMessage.tsx
-│   │   ├── Navbar.tsx
-│   │   ├── RecipeCard.tsx
-│   │   └── Spinner.tsx
-│   ├── context/
-│   │   └── FavoritesContext.tsx
-│   ├── hooks/
-│   │   ├── useFetch.ts
-│   │   └── useLocalStorage.ts
-│   ├── pages/
-│   │   ├── Category.tsx
-│   │   ├── Favorites.tsx
-│   │   ├── Home.tsx
-│   │   ├── RecipeDetail.tsx
-│   │   └── Search.tsx
-│   ├── types/
-│   │   └── recipe.ts
-│   ├── App.tsx
-│   ├── index.css
-│   └── main.tsx
-├── .gitignore
-├── eslint.config.js
-├── index.html
-├── package-lock.json
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
-\`\`\`
+The application allows users to browse recipe categories, search for recipes, view detailed recipe information, and save recipes to a personal favorites list.
 
 ## Features
 
@@ -75,7 +40,7 @@ This project uses the free TheMealDB API.
 
 API Documentation: https://www.themealdb.com/api.php
 
-Endpoints used:
+The application uses the following endpoints:
 
 - Categories: https://www.themealdb.com/api/json/v1/1/categories.php
 - Category Recipes: https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood
@@ -86,14 +51,60 @@ Endpoints used:
 
 Clone the repository:
 
-\`\`\`bash
+```bash
 git clone YOUR_GITHUB_REPOSITORY_URL
 cd recipe-discovery
 npm install
 npm run dev
-\`\`\`
+```
 
 Open the local development URL provided by Vite.
+
+## Project Structure
+
+```text
+recipe-discovery/
+├── public/
+│
+├── src/
+│   ├── components/
+│   │   ├── CategoryCard.tsx
+│   │   ├── EmptyState.tsx
+│   │   ├── ErrorMessage.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── RecipeCard.tsx
+│   │   └── Spinner.tsx
+│   │
+│   ├── context/
+│   │   └── FavoritesContext.tsx
+│   │
+│   ├── hooks/
+│   │   ├── useFetch.ts
+│   │   └── useLocalStorage.ts
+│   │
+│   ├── pages/
+│   │   ├── Category.tsx
+│   │   ├── Favorites.tsx
+│   │   ├── Home.tsx
+│   │   ├── RecipeDetail.tsx
+│   │   └── Search.tsx
+│   │
+│   ├── types/
+│   │   └── recipe.ts
+│   │
+│   ├── App.tsx
+│   ├── index.css
+│   └── main.tsx
+│
+├── .gitignore
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
+```
 
 ## Routes
 
@@ -120,9 +131,9 @@ It manages:
 
 Example:
 
-\`\`\`typescript
+```typescript
 const { data, loading, error } = useFetch<MealsResponse>(url);
-\`\`\`
+```
 
 ### useLocalStorage
 
@@ -132,10 +143,10 @@ This allows favorite recipe IDs to remain saved after refreshing or reopening th
 
 Example:
 
-\`\`\`typescript
+```typescript
 const [favorites, setFavorites] =
   useLocalStorage<string[]>("recipe-favorites", []);
-\`\`\`
+```
 
 ## Context API
 
@@ -148,90 +159,124 @@ The context provides:
 - `removeFavorite()`
 - `isFavorite()`
 
-The `FavoritesProvider` wraps the application so that all relevant components can access the favorites state.
+This allows multiple components to access and update the same favorites state without passing props through multiple levels.
 
 ## Favorite Persistence
 
-Favorite recipe IDs are stored in localStorage using the key:
+Favorite recipe IDs are stored in the browser's localStorage using the key:
 
-`recipe-favorites`
+```text
+recipe-favorites
+```
 
-Only recipe IDs are stored rather than complete recipe objects. The Favorites page uses those IDs to retrieve the current recipe information from TheMealDB API.
+Only the recipe IDs are stored rather than the complete recipe objects.
+
+When the Favorites page loads, the saved IDs are used to retrieve the current recipe information from TheMealDB API.
 
 ## State Management
 
 ### useState
 
-`useState` is used for local component state such as the search input.
+`useState` is used for local component state such as:
+
+- Search input
+- API data
+- Loading state
+- Error state
 
 ### useEffect
 
-`useEffect` is used by the custom hooks to handle API requests and synchronize data with localStorage.
+`useEffect` is used inside the `useFetch` hook to request data whenever the API URL changes.
+
+It is also used inside `useLocalStorage` to synchronize state changes with localStorage.
 
 ### Context API
 
-The Context API is used for favorites because the same state is needed by the Navbar, RecipeCard, RecipeDetail, and Favorites pages.
+The Context API is used for favorites because favorites are accessed by several unrelated components.
+
+The Navbar, RecipeCard, RecipeDetail, and Favorites page all need access to the same favorites state.
 
 ## Routing
 
-React Router provides client-side routing.
+React Router is used to provide client-side routing.
 
-Dynamic category routes use:
+Dynamic routes are used for categories and recipes:
 
-`/category/:categoryName`
+- `/category/:categoryName`
+- `/recipe/:recipeId`
 
-Dynamic recipe routes use:
+For example:
 
-`/recipe/:recipeId`
+- `/category/Seafood`
+- `/recipe/52772`
 
-Search uses a query parameter:
+The `useParams` hook retrieves the dynamic values from the URL.
 
-`/search?query=Arrabiata`
+Search uses URL query parameters:
 
-The `useParams` hook retrieves dynamic route parameters, while `useSearchParams` retrieves the search query.
+- `/search?query=Arrabiata`
+
+The `useSearchParams` hook is used to retrieve the search query.
 
 ## Loading and Error Handling
 
-The application displays a loading spinner while API requests are being processed.
+The application provides user feedback while API requests are being processed.
 
-If an API request fails, an error message and retry option are displayed.
+A reusable `Spinner` component displays a loading indicator.
 
-The application also handles:
+A reusable `ErrorMessage` component displays an error message when an API request fails.
 
-- Recipes that cannot be found
-- Empty search results
-- Empty categories
-- Users with no favorite recipes
+The application also handles cases where:
+
+- No recipes are found
+- A recipe does not exist
+- The user has no favorite recipes
 
 ## Reusable Components
 
 ### Navbar
 
-Provides application navigation, recipe search, and the favorites count.
+The `Navbar` component provides:
+
+- Application branding
+- Home navigation
+- Favorites navigation
+- Favorite count
+- Recipe search
 
 ### RecipeCard
 
-Displays a recipe image, recipe name, favorite button, and link to the recipe detail page.
+The `RecipeCard` component displays:
+
+- Recipe image
+- Recipe name
+- Favorite button
+- Link to the recipe detail page
 
 ### CategoryCard
 
-Displays a category image, category name, description, and link to the category page.
+The `CategoryCard` component displays:
+
+- Category image
+- Category name
+- Category description
+- Link to the category page
 
 ### Spinner
 
-Displays a reusable loading indicator.
+The `Spinner` component provides a reusable loading indicator.
 
 ### ErrorMessage
 
-Displays API and application errors consistently.
+The `ErrorMessage` component provides consistent error feedback throughout the application.
 
 ### EmptyState
 
-Displays a message when there is no content to display.
+The `EmptyState` component displays a message when there is no content to show, such as when the user has no favorite recipes.
 
 ## Design Decisions
 
-I chose to use the React Context API for the favorites feature because favorites are accessed by multiple components throughout the application.
+I chose to use the React Context API for the favorites feature because favorites are used by multiple components throughout the application.
 
 The Navbar displays the number of favorites, RecipeCard allows users to add or remove favorites, RecipeDetail allows users to manage a favorite, and the Favorites page displays saved recipes.
 
@@ -239,9 +284,9 @@ Using Context prevents favorite data from having to be passed through multiple l
 
 I chose to store only recipe IDs in localStorage instead of storing complete recipe objects. This keeps the stored data small and allows the application to retrieve current recipe information from the API.
 
-I created a generic `useFetch` hook so the same data-fetching logic could be reused across multiple pages while maintaining TypeScript type safety.
+I also created a generic `useFetch` hook so that the same data-fetching logic could be reused across the Home, Category, Search, Recipe Detail, and Favorites pages.
 
-Tailwind CSS v4 was used to create a responsive interface directly within the React components.
+Tailwind CSS v4 was used to create the application's responsive interface directly within the React components.
 
 ## Reflection
 
@@ -253,7 +298,7 @@ Another challenge was creating a reusable data-fetching hook that could work wit
 
 Using TypeScript generics with `useFetch` allowed the same hook to work with category responses, recipe lists, and individual recipe details while maintaining type safety.
 
-The Context API also helped keep the favorites state synchronized throughout the application. When a recipe is added or removed from favorites, the changes are reflected in the recipe cards, recipe detail page, Favorites page, and favorites counter in the navigation bar.
+The Context API also helped keep the favorites state synchronized throughout the application. When a recipe is added or removed from favorites, the changes are reflected in the recipe cards, recipe detail page, Favorites page, and favorite counter in the navigation bar.
 
 ## Future Improvements
 
@@ -269,4 +314,4 @@ The Context API also helped keep the favorites state synchronized throughout the
 
 ## Author
 
-Truong Pham
+Created as part of a React Software Engineering assignment.
